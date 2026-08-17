@@ -1,0 +1,17 @@
+node_modules/
+build/
+bin/
+dist/
+.git/
+.vscode/
+.cursor/
+.jules/
+.venv/
+temp/
+logs_*/
+*.log
+.DS_Store
+.env
+.cache
+Dockerfile
+.dockerignore

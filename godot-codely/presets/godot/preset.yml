@@ -1,0 +1,3 @@
+name: Godot Codely
+description: Godot 编辑器内 AI 工程助手模式（Loop Engineering，经自研 godot-mcp-server 读写工程文件）。配合本包的 dsh bundle 挂载 mcp__godot__* 工具使用。
+order: 10

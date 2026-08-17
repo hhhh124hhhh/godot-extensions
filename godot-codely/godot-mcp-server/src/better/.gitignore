@@ -1,0 +1,59 @@
+node_modules/
+build/
+dist
+bin/
+
+.cache
+.yarn/cache
+
+.cursor
+
+.DS_Store
+.env
+logs_*/
+*.log
+.jules/
+.venv/
+temp/
+coverage/
+
+# AI Agent
+JULES.md
+
+# Code review knowledge graph
+.code-review-graph/
+
+# Generated files
+*_e2e_result.json
+docs/superpowers/
+
+# AI Assistant / Rules
+.jules/
+.jules
+.superpower/
+superpower/
+superpowers/
+docs/superpowers/
+
+
+# Test coverage artifacts
+coverage.xml
+htmlcov/
+.coverage
+
+# AI traces (public repo hygiene)
+.Jules/
+
+# E2E test result artifacts
+tests/e2e_mcp_*report.json
+
+# Godot editor-generated project cache
+.godot/
+
+# Bot/merge junk artifacts (prevent accidental commits) — 2026-06-07
+*.orig
+*.rej
+*.cover
+*.bak
+/*.patch
+/*.diff

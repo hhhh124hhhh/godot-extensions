@@ -1,0 +1,18 @@
+# 依赖与构建产物
+node_modules/
+build/
+build-verified/
+src/better/node_modules/
+src/better/build/
+src/better/bin/
+
+# 运行时配置（可能含 Volcengine API Key，由面板/配置写入，永不入版本）
+godot-mcp-server.config.json
+*.config.json
+.env
+.env.*
+!.env.example
+
+# 系统
+.DS_Store
+*.log

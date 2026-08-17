@@ -1,0 +1,22 @@
+# ===== 运行时配置(可能含 API Key,永不入库)=====
+*.config.json
+.env
+.env.*
+!.env.example
+
+# ===== 依赖与构建产物 =====
+node_modules/
+build/
+build-verified/
+dist/
+
+# ===== Godot / CEF 下载物(体积巨大,不入库)=====
+godot-codely/downloads/
+
+# ===== 系统 =====
+.DS_Store
+*.log
+Thumbs.db
+
+# ===== 归档(旧方案,不入库)=====
+godot-codely/_archive/

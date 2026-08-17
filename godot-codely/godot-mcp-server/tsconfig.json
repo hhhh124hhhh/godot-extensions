@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "types": ["node"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./build",
+    "rootDir": "./src",
+    "declaration": false,
+    "sourceMap": false
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": [
+    "node_modules",
+    "build",
+    "src/coding-solo",
+    "src/better/src/init-server.ts",
+    "src/better/scripts",
+    "src/better/bin",
+    "src/better/vitest.config.ts",
+    "src/better/vitest.full.config.ts",
+    "src/better/vitest.live.config.ts",
+    "src/better/**/*.test.ts"
+  ]
+}

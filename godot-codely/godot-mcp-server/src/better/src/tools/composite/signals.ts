@@ -1,0 +1,174 @@
+/**
+ * Signals tool - Signal connection management in .tscn scenes
+ * Actions: list | connect | disconnect
+ */
+
+import { readFile, writeFile } from 'node:fs/promises'
+import type { GodotConfig } from '../../godot/types.js'
+import { formatJSON, formatSuccess, GodotMCPError, throwUnknownAction } from '../helpers/errors.js'
+import { resolveProjectRoot, safeResolve } from '../helpers/paths.js'
+import { parseSceneContent } from '../helpers/scene-parser.js'
+
+function validateParameters(...params: unknown[]) {
+  for (const param of params) {
+    if (typeof param !== 'string' && typeof param !== 'number' && param !== undefined) {
+      throw new GodotMCPError('Invalid parameter type', 'INVALID_ARGS', 'Signal parameters must be strings or numbers.')
+    }
+    const s = String(param)
+    if (s.includes('\n') || s.includes('\r') || s.includes('"') || s.includes(']')) {
+      throw new GodotMCPError(
+        'Invalid characters in parameters',
+        'INVALID_ARGS',
+        'Signal parameters must not contain newlines, double quotes, or closing brackets (]).',
+      )
+    }
+  }
+}
+
+async function readSceneContent(fullPath: string, scenePath: string) {
+  try {
+    return await readFile(fullPath, 'utf-8')
+  } catch (error: unknown) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      throw new GodotMCPError(`Scene not found: ${scenePath}`, 'SCENE_ERROR', 'Check the file path.')
+    }
+    throw error
+  }
+}
+
+async function handleListSignals(projectPath: string, args: Record<string, unknown>) {
+  const scenePath = args.scene_path as string
+  if (!scenePath) throw new GodotMCPError('No scene_path specified', 'INVALID_ARGS', 'Provide scene_path.')
+  const fullPath = safeResolve(projectPath, scenePath)
+
+  const content = await readSceneContent(fullPath, scenePath)
+  const scene = parseSceneContent(content)
+
+  return formatJSON({
+    scene: scenePath,
+    count: scene.connections.length,
+    connections: scene.connections,
+  })
+}
+
+async function handleConnectSignal(projectPath: string, args: Record<string, unknown>) {
+  const scenePath = args.scene_path as string
+  if (!scenePath) throw new GodotMCPError('No scene_path specified', 'INVALID_ARGS', 'Provide scene_path.')
+  const fullPath = safeResolve(projectPath, scenePath)
+
+  const signal = args.signal as string
+  const from = args.from as string
+  const to = args.to as string
+  const method = args.method as string
+  if (!signal || !from || !to || !method) {
+    throw new GodotMCPError(
+      'signal, from, to, and method required',
+      'INVALID_ARGS',
+      'Provide signal name, source node, target node, and method name.',
+    )
+  }
+
+  const flags = args.flags as number | undefined
+  if (flags !== undefined && typeof flags !== 'number') {
+    throw new GodotMCPError('flags must be a number', 'INVALID_ARGS')
+  }
+
+  validateParameters(signal, from, to, method, flags)
+
+  let content = await readSceneContent(fullPath, scenePath)
+
+  // Check for duplicate
+  const scene = parseSceneContent(content)
+  const existing = scene.connectionsKeyed.get(`${signal}:${from}:${to}:${method}`)
+  if (existing) {
+    throw new GodotMCPError('Connection already exists', 'SIGNAL_ERROR', 'This signal connection is already defined.')
+  }
+
+  // Append connection
+  const flagsAttr = flags !== undefined ? ` flags=${flags}` : ''
+  const connectionLine = `\n[connection signal="${signal}" from="${from}" to="${to}" method="${method}"${flagsAttr}]\n`
+  content = `${content.trimEnd()}\n${connectionLine}`
+
+  await writeFile(fullPath, content, 'utf-8')
+  return formatSuccess(`Connected: ${from}.${signal} -> ${to}.${method}()`)
+}
+
+async function handleDisconnectSignal(projectPath: string, args: Record<string, unknown>) {
+  const scenePath = args.scene_path as string
+  if (!scenePath) throw new GodotMCPError('No scene_path specified', 'INVALID_ARGS', 'Provide scene_path.')
+  const fullPath = safeResolve(projectPath, scenePath)
+
+  const signal = args.signal as string
+  const from = args.from as string
+  const to = args.to as string
+  const method = args.method as string
+  if (!signal || !from || !to || !method) {
+    throw new GodotMCPError(
+      'signal, from, to, and method required',
+      'INVALID_ARGS',
+      'All four parameters are required.',
+    )
+  }
+
+  validateParameters(signal, from, to, method)
+
+  const content = await readSceneContent(fullPath, scenePath)
+  const filtered: string[] = []
+  let pos = 0
+  const len = content.length
+  let found = false
+
+  while (pos < len) {
+    let nextNewline = content.indexOf('\n', pos)
+    if (nextNewline === -1) nextNewline = len
+
+    const line = content.substring(pos, nextNewline)
+    const trimmed = line.trim()
+
+    if (
+      trimmed.startsWith('[connection') &&
+      trimmed.includes(`signal="${signal}"`) &&
+      trimmed.includes(`from="${from}"`) &&
+      trimmed.includes(`to="${to}"`) &&
+      trimmed.includes(`method="${method}"`)
+    ) {
+      found = true
+    } else {
+      filtered.push(line)
+    }
+
+    pos = nextNewline + 1
+  }
+
+  if (!found) {
+    throw new GodotMCPError('Connection not found', 'SIGNAL_ERROR', 'Check signal, from, to, and method parameters.')
+  }
+
+  await writeFile(fullPath, filtered.join('\n'), 'utf-8')
+  return formatSuccess(`Disconnected: ${from}.${signal} -> ${to}.${method}()`)
+}
+
+const SIGNAL_ACTIONS: Record<
+  string,
+  (
+    projectPath: string,
+    args: Record<string, unknown>,
+  ) => Promise<{ content: Array<{ type: string; text: string }>; isError?: boolean }>
+> = {
+  list: handleListSignals,
+  connect: handleConnectSignal,
+  disconnect: handleDisconnectSignal,
+}
+
+export async function handleSignals(action: string, args: Record<string, unknown>, config: GodotConfig) {
+  const projectPath = resolveProjectRoot(args.project_path, config.projectPath)
+
+  if (Object.hasOwn(SIGNAL_ACTIONS, action)) {
+    const handler = SIGNAL_ACTIONS[action]
+    if (handler) {
+      return handler(projectPath, args)
+    }
+  }
+
+  throwUnknownAction(action, Object.keys(SIGNAL_ACTIONS))
+}

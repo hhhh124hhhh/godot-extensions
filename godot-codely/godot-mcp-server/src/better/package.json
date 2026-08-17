@@ -1,0 +1,83 @@
+{
+  "name": "@n24q02m/better-godot-mcp",
+  "mcpName": "io.github.n24q02m/better-godot-mcp",
+  "version": "1.23.1",
+  "description": "Composite MCP server for Godot Engine -- 17 composite tools for AI-assisted game development.",
+  "type": "module",
+  "main": "build/src/init-server.js",
+  "bin": {
+    "better-godot-mcp": "bin/cli.mjs"
+  },
+  "files": [
+    "build/",
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc --build && node scripts/build-cli.js",
+    "dev": "tsx watch scripts/start-server.ts",
+    "dev:http": "MCP_TRANSPORT=http tsx watch scripts/start-server.ts",
+    "dev:stdio": "tsx watch scripts/start-server.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "check": "biome check . && tsc --noEmit",
+    "package:godot-asset-store": "node scripts/build-godot-asset-store-package.mjs",
+    "test:full": "bun run build && vitest run --config vitest.full.config.ts",
+    "test:live": "bun run build && vitest run --config vitest.live.config.ts",
+    "check:fix": "biome check --fix .",
+    "clean": "rm -rf build bin",
+    "prepublishOnly": "bun run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@n24q02m/mcp-core": "1.23.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.7",
+    "@types/node": "^26.2.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.23.11",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  },
+  "trustedDependencies": [
+    "esbuild"
+  ],
+  "engines": {
+    "node": ">=24.19.0"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "godot",
+    "godot-engine",
+    "game-development",
+    "model-context-protocol",
+    "ai-agent",
+    "gdscript",
+    "claude",
+    "cursor",
+    "copilot",
+    "antigravity",
+    "codex",
+    "opencode"
+  ],
+  "author": "n24q02m",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/n24q02m/better-godot-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/n24q02m/better-godot-mcp/issues"
+  },
+  "homepage": "https://github.com/n24q02m/better-godot-mcp#readme"
+}

@@ -58,8 +58,8 @@ npm run build        # 一次 tsc 编译 src/（含 better/cs-unique/image-gen�
 {
   "host": "127.0.0.1",
   "port": 8785,
-  "godotPath": "D:/Godot_v4.7.1-stable_win64.exe",
-  "godotProjectPath": "D:/projects/game-prototypes/tomb-delver",
+  "godotPath": "<你的Godot二进制目录>",
+  "godotProjectPath": "<你的Godot工程根>",
   "volcArkApiKey": ""
 }
 ```
@@ -96,8 +96,8 @@ npm install && npm run build && npm link
         command: godot-mcp-server
         args: []
         env:
-          GODOT_PROJECT_PATH: "D:/projects/game-prototypes/tomb-delver"   # ← 改成你的工程根
-          GODOT_PATH: "D:/Godot_v4.7.1-stable_win64.exe/Godot_v4.7.1-stable_win64.exe"  # ← 可选
+          GODOT_PROJECT_PATH: "<你的Godot工程根>"   # ← 改成你的工程根
+          GODOT_PATH: "<你的Godot 4.7.1二进制路径>"  # ← 可选
 ```
 
 > 启动时序：godot 是纯 stdio、**无编辑器依赖**，装好 `npm link` 后无需任何常驻进程。MCP 工具在 dsh 会话初始化时挂载，所以**改了代码/配置后重启 dsh 会话**（新开一个）即生效。

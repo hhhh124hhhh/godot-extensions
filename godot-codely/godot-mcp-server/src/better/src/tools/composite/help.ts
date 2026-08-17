@@ -1,0 +1,99 @@
+/**
+ * Help tool - Full documentation on demand (Standard Tool Set)
+ * Loads docs from src/docs/*.md files
+ */
+
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import { GodotMCPError } from '../helpers/errors.js'
+import { pathExists } from '../helpers/paths.js'
+
+export const VALID_HELP_TOPICS = [
+  'animation',
+  'audio',
+  'editor',
+  'input_map',
+  'navigation',
+  'nodes',
+  'physics',
+  'project',
+  'resources',
+  'scenes',
+  'scripts',
+  'shader',
+  'signals',
+  'tilemap',
+  'ui',
+  'config',
+  'overview',
+] as const
+type HelpTopic = (typeof VALID_HELP_TOPICS)[number]
+
+let cachedDocsDir: string | null = null
+
+/**
+ * Get the docs directory path
+ */
+async function getDocsDir(): Promise<string> {
+  if (cachedDocsDir) return cachedDocsDir
+
+  const candidates = [
+    join(import.meta.dirname || '', '..', '..', 'docs'),
+    // Bundled CLI at bin/cli.mjs -> ../build/src/docs/
+    join(import.meta.dirname || '', '..', 'build', 'src', 'docs'),
+    // Dev mode fallback
+    join(import.meta.dirname || '', '..', 'src', 'docs'),
+    join(process.cwd(), 'src', 'docs'),
+    join(process.cwd(), 'build', 'src', 'docs'),
+  ]
+
+  // ⚡ Bolt: Cache docs dir discovery and use a sequential for-of loop with early return
+  // to avoid redundant I/O operations and array allocations.
+  for (const candidate of candidates) {
+    // Validate candidate contains actual tool docs (not a random 'docs' directory)
+    const markerFile = join(candidate, 'help.md')
+    if (await pathExists(markerFile)) {
+      cachedDocsDir = candidate
+      return cachedDocsDir
+    }
+  }
+
+  cachedDocsDir = join(process.cwd(), 'src', 'docs')
+  return cachedDocsDir
+}
+
+/**
+ * Load documentation for a specific help topic.
+ */
+async function loadDoc(topic: string): Promise<string> {
+  const docsDir = await getDocsDir()
+  const docPath = join(docsDir, `${topic}.md`)
+
+  // ⚡ Bolt: Using EAFP (Easier to Ask Forgiveness than Permission) pattern
+  // to avoid redundant pathExists() syscall before reading the file.
+  try {
+    return await readFile(docPath, 'utf-8')
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return `No documentation available for: ${topic}. This tool may not be implemented yet.`
+    }
+    throw error
+  }
+}
+
+export async function handleHelp(topic?: string) {
+  const resolvedTopic = topic === undefined ? 'overview' : topic
+
+  if (!VALID_HELP_TOPICS.includes(resolvedTopic as HelpTopic)) {
+    throw new GodotMCPError(
+      `Unknown topic: ${resolvedTopic}`,
+      'INVALID_ARGS',
+      `Valid topics: ${VALID_HELP_TOPICS.join(', ')}`,
+    )
+  }
+
+  const doc = await loadDoc(resolvedTopic)
+  // help stays markdown-only by design (no outputSchema) -- do not route through
+  // formatSuccess, which now always emits structuredContent for domain tools.
+  return { content: [{ type: 'text', text: doc }] }
+}

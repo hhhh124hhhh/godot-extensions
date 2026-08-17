@@ -1,0 +1,48 @@
+# dsh 补丁层:把「自研 godot-mcp-server」(真·去重合并版)挂进 dsh 当 godot 工具源。
+#
+# 用法(在 deepseek-harness 目录,注意用 Windows 绝对路径,不要用 /d/ 形式):
+#   node --import tsx/esm apps/cli/src/bin.ts web --patch D:/path/to/godot-codely/dsh-godot-mount.patch.yml
+#
+# 前提(可分享,无绝对路径依赖):
+#   - 克隆 godot-codely 仓库 → 在 godot-mcp-server/ 下执行一次:
+#       npm install && npm run build && npm link
+#     (npm link 是软链,后续改了代码只要重新 npm run build 即生效,不用重装)
+#   - 服务器通过全局命令 `godot-mcp-server` 启动,因此本 patch 不含任何机器路径。
+#   - GODOT_PROJECT_PATH / GODOT_PATH 指向【你自己的】Godot 工程与二进制
+#     (这两项天生是每台机器不同的,改下面 env 即可)。
+#
+# 挂上后模型可见 23 个工具(前缀 mcp__godot__,无子前缀):
+#   better 17 复合: project / scenes / nodes / scripts / editor / config / resources /
+#                   input_map / signals / animation / tilemap / shader / physics / audio /
+#                   navigation / ui / help
+#   coding-solo 4 独有: list_projects / export_mesh_library / get_uid / update_project_uids
+#   image-gen 2 原生: generate_sprite / generate_image (需 VOLC_ARK_API_KEY)
+# 复合工具用 action 参数区分子动作(如 nodes action=add)。不确定参数先调 mcp__godot__help。
+#
+# 说明:取代早期"自研 godot-MCP HTTP server + 编辑器内桥接"(已归档 _archive/) 与
+#       "npx @n24q02m/better-godot-mcp"(临时拉上游)。现在全部能力并进自有服务器,
+#       离线可用、无前缀、配置/API Key 统一读 godot-mcp-server.config.json 或 env。
+#
+# 新增行必须用 `insert:` 包裹(见 examples/mcp-memory/engram.cordis.yml),
+# 否则 dsh 会把 id 当成"覆盖已有行"而报 entry not found,导致 MCP 根本没挂上。
+
+- insert:
+    - id: mcp-godot
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        transport: stdio
+        serverName: godot
+        command: godot-mcp-server
+        args: []
+        env:
+          # ↓ 改成你自己的 Godot 工程根(示例;不填则 list_projects 仍可用,run/export 需填)
+          GODOT_PROJECT_PATH: "<你的Godot工程根, 如 D:/projects/MyGame>"
+          # ↓ 本机 Godot 4.7.1 stable 非 mono,用于 project.run / export / editor.launch;不设则自动探测
+          GODOT_PATH: "<你的Godot 4.7.1二进制路径, 可留空自动探测>"
+        toolCallTimeoutMs: 120000
+        failOnStartupError: false
+        reconnect:
+          enabled: true
+          initialDelayMs: 500
+          maxDelayMs: 30000
+          maxAttempts: 10

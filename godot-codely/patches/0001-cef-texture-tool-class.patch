@@ -1,0 +1,13 @@
+diff --git a/crates/gdcef/src/cef_texture/mod.rs b/crates/gdcef/src/cef_texture/mod.rs
+index 9d46db4..91850de 100644
+--- a/crates/gdcef/src/cef_texture/mod.rs
++++ b/crates/gdcef/src/cef_texture/mod.rs
+@@ -20,7 +20,7 @@ use crate::cef_texture2d::CefTexture2D;
+ use crate::{cef_init, input};
+ 
+ #[derive(GodotClass)]
+-#[class(base=TextureRect)]
++#[class(base=TextureRect, tool)]
+ pub struct CefTexture {
+     base: Base<TextureRect>,
+ 

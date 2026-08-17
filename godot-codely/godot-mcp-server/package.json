@@ -1,0 +1,38 @@
+{
+  "name": "godot-mcp-server",
+  "version": "2.0.0",
+  "description": "Godot MCP 主权聚合器（真·去重合并）：better-godot-mcp 17 复合工具主干 + coding-solo 4 独有工具 + Volcengine 文生图。单一 McpServer / 单一注册 / 无前缀 / 统一 SDK ^1.30.0。",
+  "type": "module",
+  "bin": {
+    "godot-mcp-server": "./build/index.js"
+  },
+  "files": [
+    "build",
+    "src",
+    "LICENSE.md",
+    "LICENSE-apache.md",
+    "NOTICE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "smoke": "node scripts/smoke.mjs",
+    "start": "node build/index.js",
+    "start:http": "MCP_TRANSPORT=http node build/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT",
+  "author": "好好先生 / 烛影 (sovereign aggregation)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/godot-mcp-server.git"
+  }
+}

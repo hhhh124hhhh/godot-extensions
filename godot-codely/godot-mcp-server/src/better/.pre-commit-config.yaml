@@ -1,0 +1,101 @@
+# Pre-commit Hooks Configuration
+# Installation: https://pre-commit.com/
+#
+# Quick start:
+#   1. Install pre-commit: uv pip install pre-commit
+#   2. Install hooks: pre-commit install
+#   3. Run manually: pre-commit run --all-files
+#
+# Bypass checks: git commit --no-verify (use only in emergency)
+
+repos:
+  # ============================================================================
+  # Security: Secret Detection (MUST be first — blocks commit if secrets found)
+  # ============================================================================
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: 83d9cd684c87d95d656c1458ef04895a7f1cbd8e # v8.30.1
+    hooks:
+      - id: gitleaks
+        name: gitleaks (detect secrets)
+
+  # ============================================================================
+  # TypeScript/JavaScript
+  # ============================================================================
+
+  - repo: local
+    hooks:
+      - id: biome-check
+        name: biome check
+        entry: bun x biome check --write
+        language: system
+        types_or: [javascript, ts, tsx, jsx, json, css]
+        pass_filenames: true
+
+      - id: typescript-check
+        name: typescript type check
+        entry: bun x tsc --noEmit
+        language: system
+        types: [ts]
+        pass_filenames: false
+
+      - id: test
+        name: test (TypeScript)
+        entry: bun run test
+        language: system
+        types: [ts]
+        pass_filenames: false
+
+  # ============================================================================
+  # Common Checks
+  # ============================================================================
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b # v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        name: trim trailing whitespace
+        exclude_types: [image]
+
+      - id: check-merge-conflict
+        name: check for merge conflicts
+
+      - id: check-json
+        name: check JSON files
+        types: [json]
+
+      - id: check-yaml
+        name: check YAML files
+        types: [yaml]
+
+      - id: check-toml
+        name: check TOML files
+        types: [toml]
+
+      - id: end-of-file-fixer
+        name: fix end of files
+        exclude_types: [image]
+
+  # ============================================================================
+  # Commit Message Enforcement
+  # ============================================================================
+  - repo: local
+    hooks:
+      - id: enforce-commit
+        name: Enforce feat and fix commit prefixes
+        entry: bash scripts/enforce-commit.sh
+        language: system
+        stages: [commit-msg]
+
+  # ============================================================================
+  # Content integrity: block ASCII rewriting of Vietnamese diacritics
+  # + Unicode punctuation (em-dash, ellipsis, arrows, smart quotes, emoji).
+  # See scripts/preserve-diacritics.py and feedback_vietnamese_diacritics rule.
+  # ============================================================================
+  - repo: local
+    hooks:
+      - id: preserve-diacritics
+        name: Preserve Vietnamese diacritics + Unicode punctuation
+        entry: python scripts/preserve-diacritics.py
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]

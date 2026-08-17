@@ -1,0 +1,21 @@
+godot-mcp-server
+Copyright 2026 好好先生 / 烛影 (sovereign aggregation layer)
+
+This product aggregates third-party MCP servers, each retaining its own license:
+
+- @coding-solo/godot-mcp (MIT)
+  Copyright (c) 2025 Solomon Elias <solomon@sippy.ai>
+  Upstream source was deleted after dedup-merge; 4 uniquely-capable tools are
+  ported into src/cs-unique/ and the bundled GDScript is kept at
+  src/godot-scripts/godot_operations.gd (both under the upstream MIT license).
+
+- better-godot-mcp (Apache License 2.0)
+  Copyright 2026 n24q02m
+  Vendored source: src/better/  (LICENSE: src/better/LICENSE;
+  partial MIT portions: src/better/LICENSE-MIT; upstream NOTICE: src/better/NOTICE)
+
+- image-gen component (ported from cocos-mcp-bridge, funplay-cocos-mcp, MIT)
+  Volcengine Ark text-to-image integration.
+
+No code in this repository phones home or performs telemetry; both upstreams were
+verified to contain no external update/telemetry calls prior to vendoring.

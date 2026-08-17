@@ -1,0 +1,21 @@
+{
+  "name": "godot-codely",
+  "version": "0.1.0",
+  "package_version": 2,
+  "description": "Godot 版「Codely」外层插件：dsh web(默认 http://127.0.0.1:3080) + 自研 godot-mcp-server（23 工具，stdio 挂载）驱动 Godot 工程。可选 godot-codely-addon + godot-cef 把 dsh web 内嵌进编辑器右侧 Dock。",
+  "main": "./dist/main.js",
+  "files": [
+    "package.json",
+    "dsh-godot-mount.patch.yml",
+    "SYSTEM_PROMPT.md",
+    "QUICKSTART.md",
+    "README.md",
+    "AGENTS.md",
+    "presets"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./dsh-godot-mount.patch.yml"
+    }
+  }
+}

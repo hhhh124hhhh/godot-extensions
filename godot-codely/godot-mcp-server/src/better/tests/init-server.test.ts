@@ -1,0 +1,305 @@
+/**
+ * Tests for initServer function - Server initialization flow
+ * Tests both stdio proxy and HTTP transport modes.
+ */
+
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { logger } from '../src/tools/helpers/logger.js'
+
+const mockServerConstructor = vi.fn()
+const mockConnect = vi.fn().mockResolvedValue(undefined)
+const mockSetRequestHandler = vi.fn()
+const mockStdioTransportConstructor = vi.fn()
+
+// Mock all dependencies before importing
+vi.mock('@modelcontextprotocol/sdk/server/index.js', () => {
+  class MockServer {
+    constructor(...args: unknown[]) {
+      mockServerConstructor(...args)
+    }
+    setRequestHandler = mockSetRequestHandler
+    connect = mockConnect
+  }
+  return {
+    Server: MockServer,
+  }
+})
+
+vi.mock('@modelcontextprotocol/sdk/server/stdio.js', () => {
+  class MockStdioServerTransport {
+    constructor(...args: unknown[]) {
+      mockStdioTransportConstructor(...args)
+    }
+  }
+  return {
+    StdioServerTransport: MockStdioServerTransport,
+  }
+})
+
+vi.mock('../src/godot/detector.js', () => ({
+  detectGodot: vi.fn(),
+}))
+
+vi.mock('../src/godot/headless.js', () => ({
+  getTrackedPids: vi.fn().mockReturnValue([]),
+  killProcessTree: vi.fn().mockReturnValue(false),
+}))
+
+vi.mock('../src/tools/registry.js', () => ({
+  registerTools: vi.fn(),
+}))
+
+// Mock package.json
+vi.mock('../package.json', () => ({
+  default: {
+    version: '1.2.3',
+  },
+}))
+
+// Mock mcp-core runHttpServer (stdio path uses StdioServerTransport directly)
+const mockStartHttp = vi.fn().mockResolvedValue({
+  host: '127.0.0.1',
+  port: 12345,
+  close: vi.fn().mockResolvedValue(undefined),
+})
+vi.mock('@n24q02m/mcp-core', () => ({
+  runHttpServer: (...args: unknown[]) => mockStartHttp(...args),
+}))
+
+describe('initServer', () => {
+  const originalEnv = process.env
+  const originalArgv = process.argv
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockConnect.mockResolvedValue(undefined)
+    mockStartHttp.mockResolvedValue({
+      host: '127.0.0.1',
+      port: 12345,
+      close: vi.fn().mockResolvedValue(undefined),
+    })
+    vi.spyOn(process, 'exit').mockImplementation((() => {}) as unknown as (code?: number) => never)
+    // Suppress logger output during tests
+    vi.spyOn(logger, 'info').mockImplementation(() => {})
+    vi.spyOn(logger, 'warn').mockImplementation(() => {})
+    vi.spyOn(logger, 'error').mockImplementation(() => {})
+    process.env = { ...originalEnv }
+    process.argv = [...originalArgv]
+  })
+
+  afterEach(() => {
+    process.env = originalEnv
+    process.argv = originalArgv
+    vi.restoreAllMocks()
+  })
+
+  const runHttpInit = async (initServer: () => Promise<void>): Promise<void> => {
+    const done = initServer()
+    await new Promise((r) => setImmediate(r))
+    await new Promise((r) => setImmediate(r))
+    process.emit('SIGINT')
+    await done
+  }
+
+  describe('transport mode selection', () => {
+    it('should default to stdio mode when no flags are set', async () => {
+      const { detectGodot } = await import('../src/godot/detector.js')
+      vi.mocked(detectGodot).mockReturnValue(null)
+      delete process.env.MCP_TRANSPORT
+      delete process.env.TRANSPORT_MODE
+
+      const { initServer } = await import('../src/init-server.js')
+      await initServer()
+
+      expect(mockStdioTransportConstructor).toHaveBeenCalledOnce()
+      expect(mockConnect).toHaveBeenCalledOnce()
+      expect(mockStartHttp).not.toHaveBeenCalled()
+    })
+
+    it('should use HTTP mode when --http flag is passed', async () => {
+      const { detectGodot } = await import('../src/godot/detector.js')
+      vi.mocked(detectGodot).mockReturnValue(null)
+      process.argv = [...originalArgv, '--http']
+
+      const { initServer } = await import('../src/init-server.js')
+      await runHttpInit(initServer)
+
+      expect(mockStartHttp).toHaveBeenCalledOnce()
+      expect(mockStdioTransportConstructor).not.toHaveBeenCalled()
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Server started in HTTP mode'))
+    })
+
+    it('should use HTTP mode when MCP_TRANSPORT=http', async () => {
+      const { detectGodot } = await import('../src/godot/detector.js')
+      vi.mocked(detectGodot).mockReturnValue(null)
+      process.env.MCP_TRANSPORT = 'http'
+
+      const { initServer } = await import('../src/init-server.js')
+      await runHttpInit(initServer)
+
+      expect(mockStartHttp).toHaveBeenCalledOnce()
+      expect(mockStdioTransportConstructor).not.toHaveBeenCalled()
+    })
+
+    it('should use HTTP mode when TRANSPORT_MODE=http', async () => {
+      const { detectGodot } = await import('../src/godot/detector.js')
+      vi.mocked(detectGodot).mockReturnValue(null)
+      process.env.TRANSPORT_MODE = 'http'
+
+      const { initServer } = await import('../src/init-server.js')
+      await runHttpInit(initServer)
+
+      expect(mockStartHttp).toHaveBeenCalledOnce()
+      expect(mockStdioTransportConstructor).not.toHaveBeenCalled()
+    })
+
+    it('should pass server factory and options to runHttpServer in HTTP mode', async () => {
+      const { detectGodot } = await import('../src/godot/detector.js')
+      vi.mocked(detectGodot).mockReturnValue(null)
+      process.env.MCP_TRANSPORT = 'http'
+
+      const { initServer } = await import('../src/init-server.js')
+      await runHttpInit(initServer)
+
+      expect(mockStartHttp).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({ serverName: 'better-godot-mcp' }),
+      )
+    })
+  })
+
+  describe('createGodotServer', () => {
+    it('should initialize server when Godot is detected', async () => {
+      const { detectGodot } = await import('../src/godot/detector.js')
+      vi.mocked(detectGodot).mockReturnValue({
+        path: '/usr/bin/godot',
+        version: { major: 4, minor: 3, patch: 0, label: 'stable', raw: '4.3.stable' },
+        source: 'path',
+      })
+
+      const { createGodotServer } = await import('../src/init-server.js')
+      createGodotServer()
+
+      const { registerTools } = await import('../src/tools/registry.js')
+      expect(registerTools).toHaveBeenCalledOnce()
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Godot detected'))
+    })
+
+    it('should initialize server when Godot is not found', async () => {
+      const { detectGodot } = await import('../src/godot/detector.js')
+      vi.mocked(detectGodot).mockReturnValue(null)
+
+      const { createGodotServer } = await import('../src/init-server.js')
+      createGodotServer()
+
+      const { registerTools } = await import('../src/tools/registry.js')
+      expect(registerTools).toHaveBeenCalledOnce()
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Godot not found'))
+    })
+
+    it('should instantiate Server with correct name, version, and capabilities', async () => {
+      const { detectGodot } = await import('../src/godot/detector.js')
+      vi.mocked(detectGodot).mockReturnValue(null)
+
+      const { createGodotServer } = await import('../src/init-server.js')
+      createGodotServer()
+
+      expect(mockServerConstructor).toHaveBeenCalledWith(
+        {
+          name: 'better-godot-mcp',
+          version: expect.any(String),
+        },
+        {
+          capabilities: {
+            tools: {},
+          },
+        },
+      )
+    })
+  })
+
+  describe('HTTP shutdown process cleanup', () => {
+    it('tree-kills tracked Godot pids before closing the HTTP handle on SIGINT', async () => {
+      const { detectGodot } = await import('../src/godot/detector.js')
+      vi.mocked(detectGodot).mockReturnValue(null)
+      process.env.MCP_TRANSPORT = 'http'
+
+      const { getTrackedPids, killProcessTree } = await import('../src/godot/headless.js')
+      vi.mocked(getTrackedPids).mockReturnValue([111, 222])
+      vi.mocked(killProcessTree).mockReturnValue(true)
+
+      const { initServer } = await import('../src/init-server.js')
+      await runHttpInit(initServer)
+
+      expect(killProcessTree).toHaveBeenCalledWith(111)
+      expect(killProcessTree).toHaveBeenCalledWith(222)
+    })
+
+    it('closes the HTTP handle even if killProcessTree throws unexpectedly', async () => {
+      const { detectGodot } = await import('../src/godot/detector.js')
+      vi.mocked(detectGodot).mockReturnValue(null)
+      process.env.MCP_TRANSPORT = 'http'
+
+      const { getTrackedPids, killProcessTree } = await import('../src/godot/headless.js')
+      vi.mocked(getTrackedPids).mockReturnValue([333])
+      vi.mocked(killProcessTree).mockImplementation(() => {
+        throw new Error('unexpected')
+      })
+
+      const closeSpy = vi.fn().mockResolvedValue(undefined)
+      mockStartHttp.mockResolvedValue({ host: '127.0.0.1', port: 12345, close: closeSpy })
+
+      const { initServer } = await import('../src/init-server.js')
+      await expect(runHttpInit(initServer)).resolves.not.toThrow()
+
+      expect(closeSpy).toHaveBeenCalledOnce()
+    })
+  })
+
+  describe('error handling', () => {
+    it('should handle errors during server initialization (stdio connect failure)', async () => {
+      const { detectGodot } = await import('../src/godot/detector.js')
+      vi.mocked(detectGodot).mockReturnValue(null)
+      process.env.MCP_TRANSPORT = 'stdio'
+
+      const testError = new Error('Connect failed')
+      mockConnect.mockRejectedValueOnce(testError)
+
+      const { initServer } = await import('../src/init-server.js')
+
+      await expect(initServer()).rejects.toThrow('Connect failed')
+      expect(logger.error).toHaveBeenCalledWith('Failed to initialize server:', testError)
+    })
+
+    it('should handle errors during HTTP startup', async () => {
+      const { detectGodot } = await import('../src/godot/detector.js')
+      vi.mocked(detectGodot).mockReturnValue(null)
+      process.env.MCP_TRANSPORT = 'http'
+
+      const testError = new Error('Port in use')
+      mockStartHttp.mockRejectedValue(testError)
+
+      const { initServer } = await import('../src/init-server.js')
+
+      await expect(initServer()).rejects.toThrow('Port in use')
+      expect(logger.error).toHaveBeenCalledWith('Failed to initialize server:', testError)
+    })
+  })
+
+  describe('getVersion', () => {
+    it('should return version from package.json', async () => {
+      const { detectGodot } = await import('../src/godot/detector.js')
+      vi.mocked(detectGodot).mockReturnValue(null)
+
+      const { createGodotServer } = await import('../src/init-server.js')
+      createGodotServer()
+
+      expect(mockServerConstructor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          version: '1.2.3',
+        }),
+        expect.anything(),
+      )
+    })
+  })
+})
