@@ -102,6 +102,8 @@ npm install && npm run build && npm link
 
 > 启动时序：godot 是纯 stdio、**无编辑器依赖**，装好 `npm link` 后无需任何常驻进程。MCP 工具在 dsh 会话初始化时挂载，所以**改了代码/配置后重启 dsh 会话**（新开一个）即生效。
 
+> **路径安全模型**：better 主干要求所有 `project_path` 参数**必须在当前配置的工程根内**，否则返回 `Access denied: outside the project root`。两个做法：① 启动时设 `GODOT_PROJECT_PATH`（dsh patch env）；② **运行时切换工程**（零重启）——用 `config set project_path=<路径>` 切到目标工程，`config status` 复核，再调其他工具。
+
 ## 许可
 
 - sovereign 聚合层 + image-gen：MIT（见 LICENSE.md）
