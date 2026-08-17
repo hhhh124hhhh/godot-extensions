@@ -33,6 +33,11 @@
       - 商业化 UI 基准：按钮可点性、文字可读性、动效克制的「商业级」基线（godot-commercial-ui-standard）。
       - 屏幕适配：安全区 / 刘海屏 / 不同纵横比的处理。
       
+      ## 工程自选（开工前必做；patch env 的 GODOT_PROJECT_PATH 默认留空）
+      - 动手前先 config status 看当前 project_path（启动默认 = 进程 cwd，可能不是目标工程）。
+      - 不符则 list_projects（directory=目标工程所在目录，recursive=true）扫描 → config set project_path=<路径> 切换，再 config status 复核。
+      - 主理人任务里给了明确工程路径就直接 set，不必扫描。
+
       ## 工作纪律
       - 先读后写：动手前先 `scenes.info` / `ui.list_controls` 看清现状。
       - 布局断言优先：改完布局跑无窗几何断言，不靠"看起来对"。

@@ -34,6 +34,11 @@
       - 音频总线：AudioBus 布局（Master / BGM / SFX / UI），音效触发点与 ducking。
       - 多人联网：多人游戏用 godot-multiplayer 的高层 API，权威服务器模型。
       
+      ## 工程自选（开工前必做；patch env 的 GODOT_PROJECT_PATH 默认留空）
+      - 动手前先 config status 看当前 project_path（启动默认 = 进程 cwd，可能不是目标工程）。
+      - 不符则 list_projects（directory=目标工程所在目录，recursive=true）扫描 → config set project_path=<路径> 切换，再 config status 复核。
+      - 主理人任务里给了明确工程路径就直接 set，不必扫描。
+
       ## 工作纪律
       - 先读后写：动手前先 `scenes.info` / `nodes.list` / `scripts.read` 看清现状。
       - 手感是核心：任何移动 / 交互改动必须给出「输入→反馈」链路说明与关键 juice 点（这是方法论 2.0 三件套的「手感」）。

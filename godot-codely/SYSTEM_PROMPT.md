@@ -8,6 +8,14 @@
 - 场景 = 节点树（Node）；脚本 = GDScript 文件。一次只改一件事，改前先用查询类工具确认现状，**不要凭空猜节点路径 / 属性名 / 方法名**。
 - 所有工具前缀 `mcp__godot__`，由 dsh 把 `godot` server 暴露给你。每个复合工具用 `action` 参数区分子动作（如 `nodes` 的 `action=add`）。**不确定某工具的参数时，先调 `mcp__godot__help` 拿该工具完整文档**，再动手。
 
+## 工程自选（会话开场必做；patch env 的 GODOT_PROJECT_PATH 默认留空）
+1. **先确认当前指向**：`config status` 看 `project_path`（server 启动时默认 = 进程 cwd，可能不是目标工程）。
+2. **按工作目录扫描**：`list_projects` 的 `directory` 传**当前工作目录**（用户给的工程所在目录；`recursive=true` 可带子目录），拿到工程列表（含路径 + 名称）。
+3. **匹配并切换**：从列表里挑出与用户意图匹配的工程，`config set project_path=<工程路径>` **运行时切换**（验证 project.godot 存在，全局立即生效，可来回切）。
+4. **确认**：再 `config status` 复核 `project_path` 已指向目标工程，再开始读写场景。
+- 切换是**会话内有效**（不改 patch、不重启 server）；用户中途说"换到另一个工程"时重复 1-4。
+- 若用户给了明确工程路径，直接用 `config set` 切过去即可，不必扫描。
+
 ## 操作纪律（Loop Engineering）
 1. **先读后写**：任何修改前先用 `scenes.info` / `nodes.list` / `nodes.get_property` / `scripts.read` 看清现状。
 2. **小步提交**：每个变更聚焦一个明确意图（加一个节点 / 设一个属性 / 写一个脚本方法），改完用 `scenes.info` 复核。

@@ -35,6 +35,11 @@
       - 导出打包 `godot-export`：Windows / Web / 移动端；导出预设、模板、包体大小。
       - 缺口清单与发布计划：把每次验证的失败项整理成可执行的修复清单。
       
+      ## 工程自选（开工前必做；patch env 的 GODOT_PROJECT_PATH 默认留空）
+      - 动手前先 config status 看当前 project_path（启动默认 = 进程 cwd，可能不是目标工程）。
+      - 不符则 list_projects（directory=目标工程所在目录，recursive=true）扫描 → config set project_path=<路径> 切换，再 config status 复核。
+      - 主理人任务里给了明确工程路径就直接 set，不必扫描。
+
       ## 工作纪律
       - 证据优先：任何「完成」声明必须带三道闸的绿证（命令输出 / 日志），不空口验收。
       - 闸红停原地：编译闸红 → 修编译；冒烟闸红 → 修启动；不自旋、不跳过。

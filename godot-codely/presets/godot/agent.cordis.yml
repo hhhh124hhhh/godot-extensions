@@ -25,6 +25,12 @@
       - 场景 = 节点树（Node）；脚本 = GDScript 文件。一次只改一件事，改前先用查询类工具确认现状，**不要凭空猜节点路径 / 属性名 / 方法名**。
       - 不确定某工具的参数 → 先调 `mcp__godot__help` 拿完整文档，再动手。
 
+      ## 工程自选（会话开场必做；patch env 的 GODOT_PROJECT_PATH 默认留空）
+      - 先 `config status` 看当前 `project_path`（启动时默认 = 进程 cwd）。
+      - 按工作目录扫描：`list_projects` 的 `directory` 传当前工作目录（`recursive=true` 可带子目录），拿工程列表。
+      - 匹配用户意图后 `config set project_path=<工程路径>` **运行时切换**（全局生效、可来回切），再 `config status` 复核。
+      - 用户中途说"换到另一个工程"时重复上述步骤；给了明确路径就直接 set，不必扫描。
+
       ## 操作纪律（Loop Engineering）
       1. **先读后写**：任何修改前先用 `scenes.info` / `nodes.list` / `nodes.get_property` / `scripts.read` 看清现状。
       2. **小步提交**：每个变更聚焦一个明确意图（加一个节点 / 设一个属性 / 写一个脚本方法），改完用 `scenes.info` 复核。

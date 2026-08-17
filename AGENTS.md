@@ -86,9 +86,9 @@ dsh --profile web --dump-config 2>&1 | grep -A6 "mcp-godot"
 
 ## 6. 让整套真正可用（运行时必做）
 
-1. 编辑 `godot-codely/dsh-godot-mount.patch.yml` 的 env（每台机器不同）：
-   - `GODOT_PROJECT_PATH` → 你的 Godot 工程根（示例是占位符）。
-   - `GODOT_PATH` → 你的 Godot 4.7.1 二进制（可留空自动探测）。
+1. `dsh-godot-mount.patch.yml` 的 env **默认留空即可**（工程自选模式）：
+   - `GODOT_PROJECT_PATH` 留空 → agent 会话开场自动按工作目录选工程：`list_projects` 扫目录 → `config set project_path=<路径>` 运行时切换（全局生效、可来回切，不改 patch 不重启）。想固定默认工程也可填具体路径。
+   - `GODOT_PATH` 填你的 Godot 4.7.1 二进制（可留空自动探测）。
 2. 起 dsh 并挂 godot 工具源：
    ```bash
    dsh --profile web --patch <本目录>/godot-codely/dsh-godot-mount.patch.yml
@@ -144,7 +144,7 @@ godot-mcp-server 的 AI 出图走**火山方舟（Volcengine Ark）**，需要 A
 
 - **`mcp__godot__*` 全部缺失 / spawn 失败** → ① 确认 `godot-mcp-server` 全局命令可用（`godot-mcp-server --help`）；② patch 必须用 `insert:` 包裹（否则报 `entry "mcp-godot" not found`，MCP 静默不挂）；③ 硬刷新 dsh 3080。
 - **`dsh plugin add` 报 `safe-delete` / `Some operations were aborted`** → 本机 EDR 拦了回收站操作，属预期。用本目录安装器（已带手工回退）或第 4.1 的手工法，不要加杀软排除项。
-- **`project.run` / `project.export` 起不来** → `GODOT_PATH` 没配对（patch env），或配的路径不是 4.7.1 stable 控制台版。`GODOT_PROJECT_PATH` 指向的目录要有 `project.godot`。
+- **`project.run` / `project.export` 起不来** → `GODOT_PATH` 没配对（patch env），或配的路径不是 4.7.1 stable 控制台版。`project_path` 指向的目录要有 `project.godot`（会话内用 `config set project_path` 切换；`config status` 看当前指向）。
 - **npm link 被 EDR 拦 / 全局命令不可用** → 退化方案：patch 的 `command` 改成 `node`、`args` 改成 `["<仓库路径>/godot-codely/godot-mcp-server/build/index.js"]`（绝对路径，每机不同），见 QUICKSTART「离线/受限方案」。
 - **想分享给别人**：对方 `git clone` 后跑 `node install-godot-stack.mjs` 即可，无本机路径依赖（patch env 每机必填）。junction 指向的必须是**对方自己的**路径。
 - **AgentTeams 拉不起团队 / 没有 `agent_teams_*` 工具** → ① 确认 `@nanmicoder/dsh-agent-teams` 已装进 profile `node_modules`（新机先 `npm install` 或 `dsh plugin add`，再重跑安装器挂 bundle）；② 改完 bundle 必须**重启 dsh**（Vite HMR 不重载 host 组合）再硬刷新 3080；③ 一个队长同时只能带一个活动团队。

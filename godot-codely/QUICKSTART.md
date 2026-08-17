@@ -40,9 +40,15 @@ npm link        # 全局命令 godot-mcp-server 可用（软链，改代码只�
 ```
 > npm link 被 EDR 拦时，退化为把 patch 的 command 改成 node + 绝对路径（见「离线/受限方案」）。
 
-### 2. 改 patch 里的工程路径
-编辑 `dsh-godot-mount.patch.yml`，把 `env.GODOT_PROJECT_PATH` 改成你的 Godot 工程根
-（默认给的是示例 `D:/projects/game-prototypes/tomb-delver`）。可选填 `GODOT_PATH` 指向本机 Godot 4.7.1 二进制。
+### 2. 工程自选（patch env 默认留空，无需改路径）
+`dsh-godot-mount.patch.yml` 的 `env.GODOT_PROJECT_PATH` **默认留空**——agent 在会话开场自动按工作目录选工程：
+
+1. `config status` 看当前指向（启动时默认 = 进程 cwd）。
+2. `list_projects` 的 `directory` 传当前工作目录（`recursive=true` 带子目录），拿工程列表。
+3. `config set project_path=<工程路径>` **运行时切换**（全局生效、可来回切，不改 patch 不重启）。
+4. `config status` 复核后再动手。
+
+想固定默认工程也可填具体路径（如 `D:/projects/MyGame`）；`GODOT_PATH` 指向本机 4.7.1 二进制（留空自动探测）。
 
 ### 3. 起 dsh 并挂 godot-MCP
 > ⚠️ **路径用 Windows 绝对路径**（如 `D:/...`），不要用 Git Bash 的 `/d/...` 形式 ——

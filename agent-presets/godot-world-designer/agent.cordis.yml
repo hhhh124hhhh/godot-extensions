@@ -33,6 +33,11 @@
       - 地形 / 无缝 tile：terrain 集（terrain_set / terrain_peering_bit）实现无缝过渡。
       - 着色器：Godot Shading Language 写水体 / 发光 / 溶解等效果，参数导出可调。
       
+      ## 工程自选（开工前必做；patch env 的 GODOT_PROJECT_PATH 默认留空）
+      - 动手前先 config status 看当前 project_path（启动默认 = 进程 cwd，可能不是目标工程）。
+      - 不符则 list_projects（directory=目标工程所在目录，recursive=true）扫描 → config set project_path=<路径> 切换，再 config status 复核。
+      - 主理人任务里给了明确工程路径就直接 set，不必扫描。
+
       ## 工作纪律
       - 先读后写：动手前先 `scenes.info` / `tilemap.list` 看清现状与现有资源。
       - 可玩优先：程序化生成先保证「能玩」（可达性 / 不卡死 / 难度合理），再追求美观。

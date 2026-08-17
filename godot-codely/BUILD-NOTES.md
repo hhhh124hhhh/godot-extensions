@@ -48,25 +48,25 @@ FATAL: CefApp_0_CToCpp called with invalid version -1
 
 ```bash
 # 1. 取源码并切到与随包 libcef 配套的 tag
-git clone https://github.com/dsh0416/godot-cef D:/godot-cef-src
-cd D:/godot-cef-src
+git clone https://github.com/dsh0416/godot-cef <你的源码目录>
+cd <你的源码目录>
 git fetch --unshallow --tags
 git checkout -B v1153-tool v1.15.3          # commit 8e7b958
 
 # 2. 打 tool 补丁（一行）
-git apply D:/ai-game-workstation/godot-extensions/godot-codely/patches/0001-cef-texture-tool-class.patch
+git apply <仓库路径>/godot-codely/patches/0001-cef-texture-tool-class.patch
 
 # 3. 工具链（本机已装）：Rust nightly + cmake + ninja
 export PATH="$PATH:/c/Program Files/CMake/bin:/c/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja"
 cargo +nightly build --release -p gdcef      # 首次约 10min（含 CEF 148 分发下载）
 
 # 4. 替换进 addon（勿动 libcef.dll 等其它依赖文件）
-cp -f D:/godot-cef-src/target/release/gdcef.dll \
-      D:/godot-addons/godot_cef/bin/x86_64-pc-windows-msvc/gdcef.dll
+cp -f <源码目录>/target/release/gdcef.dll \
+      <你的addon目录>/godot_cef/bin/x86_64-pc-windows-msvc/gdcef.dll
 
-# 5. headless 自检（路径必须是 D:/ 形式，不能用 /d/）
-"D:/Godot_v4.7.1-stable_win64.exe/Godot_v4.7.1-stable_win64_console.exe" \
-  --headless --editor --quit --path "D:/projects/game-prototypes/tomb-delver" > D:/cef.log 2>&1
+# 5. headless 自检（路径用 Windows 绝对路径 D:/ 形式，不能用 /d/）
+"<你的Godot 4.7.1控制台版路径>" \
+  --headless --editor --quit --path "<你的Godot工程>" > <你的日志路径>/cef.log 2>&1
 ```
 
 ### 通过标准（headless 日志里必须同时出现）

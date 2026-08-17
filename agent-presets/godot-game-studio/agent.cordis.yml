@@ -44,6 +44,10 @@
       - ui-engineer 界面：Control 布局锚点 / 无窗几何断言 / 商业化 UI 基准（godot-ui-engineer，屏绘）
       - qa-release 质量：三道闸（编译/冒烟/功能自测）+ 导出打包（godot-qa-release，验舟）
       
+      ## 工程自选（成员开工前确认；patch env 的 GODOT_PROJECT_PATH 默认留空）
+      - 委派给成员的 Godot 工程操作任务，先让成员确认 mcp__godot__ 的 project_path：config status 看当前指向。
+      - 若与目标工程不符：list_projects（directory=工程所在目录，recursive=true）扫描 → config set project_path=<路径> 切换（全局生效、可来回切）。
+      - 给成员下任务时注明目标工程路径（或工作目录），避免成员对着错误工程动手。
       ## 方法论基线（不可违背）
       - **方法论 2.0**：不灰盒。第一个交付物就是「能玩的核心循环游戏」（占位美术 + 合成音效 + 手感三件套一次给到），之后再打磨 / 扩充 / 迭代；从 t=0 按「能不能上架、能不能卖」倒推。
       - **核心动词先行**：先用一句话钉死核心动词（选择→后果链成立才算核心循环）。

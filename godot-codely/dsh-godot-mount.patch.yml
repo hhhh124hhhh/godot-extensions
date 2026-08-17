@@ -35,10 +35,13 @@
         command: godot-mcp-server
         args: []
         env:
-          # ↓ 改成你自己的 Godot 工程根(示例;不填则 list_projects 仍可用,run/export 需填)
-          GODOT_PROJECT_PATH: "<你的Godot工程根, 如 D:/projects/MyGame>"
+          # ↓ 工程自选模式:留空 = agent 按工作目录自选(推荐)。
+          #    agent 用 mcp__godot__list_projects 扫当前工作目录 → 找到工程后
+          #    mcp__godot__config set project_path=<工程路径> 运行时切换(全局生效,可来回切)。
+          #    想固定默认工程也可以填具体路径(如 D:/projects/MyGame),agent 仍可随时切换。
+          GODOT_PROJECT_PATH: ""
           # ↓ 本机 Godot 4.7.1 stable 非 mono,用于 project.run / export / editor.launch;不设则自动探测
-          GODOT_PATH: "<你的Godot 4.7.1二进制路径, 可留空自动探测>"
+          GODOT_PATH: ""
         toolCallTimeoutMs: 120000
         failOnStartupError: false
         reconnect:
