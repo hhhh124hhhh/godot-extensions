@@ -1,13 +1,13 @@
 # Godot Codely — Godot 编辑器内嵌 dsh web 面板
 
-把 **DeepSeek Harness (dsh)** 的 web 聊天界面（已挂 `better-godot-mcp` + 专家团知识）**嵌进 Godot 编辑器右侧 Dock**，
+把 **DeepSeek Harness (dsh)** 的 web 聊天界面（已挂 `godot-mcp-server` + 专家团知识）**嵌进 Godot 编辑器右侧 Dock**，
 形态与 `cocos-codely`（`iframe` dsh web）同构——只是 Godot 面板是原生 `Control`，不能 iframe，改用 **webview GDExtension** 渲染 dsh web。
 
 ```
 Godot 编辑器右侧 Dock (Codely 面板)
    └─ webview 节点 (填满面板)
         └─ http://127.0.0.1:3080   ← dsh web
-                                      └─ better-godot-mcp (stdio) ──► 你的 Godot 工程 .tscn/.gd
+                                      └─ godot-mcp-server (stdio) ──► 你的 Godot 工程 .tscn/.gd
 ```
 
 聊天在编辑器里，AI 改工程文件直接生效（开着的 Godot 编辑器会热重载）。
@@ -90,7 +90,7 @@ powershell -File install.ps1 -Global
 | | cocos-codely | godot-codely (路A) |
 |---|---|---|
 | 聊天 UI 位置 | Cocos 面板 `<iframe>` dsh web | Godot 面板 webview 渲染 dsh web |
-| AI 工具源 | funplay-cocos-mcp (8765) | better-godot-mcp (stdio) |
+| AI 工具源 | cocos-mcp-bridge (8765) | godot-mcp-server (stdio) |
 | 专家团知识 | SYSTEM_PROMPT.md | SYSTEM_PROMPT.md（同一套） |
 | 改文件方式 | MCP 工具改工程 | MCP 工具改工程（同） |
 | Godot 编辑器常驻 | 不需要（Cocos 侧） | 不需要（AI 改文件），仅 run/export 调二进制 |
