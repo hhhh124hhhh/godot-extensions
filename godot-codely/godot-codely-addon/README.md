@@ -48,7 +48,7 @@ Godot 没有内置浏览器控件，必须装一个 webview 扩展。**GDExtensi
 
 ```powershell
 # 装进某个工程（junction 优先，EDR 拦链接则自动降级复制）
-powershell -File install.ps1 -Project "D:/projects/game-prototypes/tomb-delver"
+powershell -File install.ps1 -Project "<你的Godot工程根>"
 # 想覆盖已装的：加 -Force
 # 顺带把 webview 扩展也挂上：加 -WebView "D:/path/to/godot-cef"
 ```
