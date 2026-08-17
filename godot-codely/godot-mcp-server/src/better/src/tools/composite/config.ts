@@ -98,8 +98,31 @@ async function handleSet(args: Record<string, unknown>, config: GodotConfig) {
 
 /**
  * Detect Godot installation on the system.
+ * [sovereign] 优先用已配置的 godotPath（config.json / GODOT_PATH env），
+ * 避免"工具能用 Godot 但 detect_godot 报 not found"的不一致。
  */
-async function handleDetectGodot() {
+async function handleDetectGodot(_args: Record<string, unknown>, config: GodotConfig) {
+  if (config.godotPath) {
+    const version = tryGetVersion(config.godotPath, true)
+    if (version) {
+      return formatJSON({
+        found: true,
+        path: config.godotPath,
+        version,
+        source: 'config',
+      })
+    }
+    return formatJSON({
+      found: false,
+      message: 'Configured Godot path is not usable',
+      suggestions: [
+        'Check godot-mcp-server.config.json godotPath field',
+        'Or set GODOT_PATH environment variable to a valid Godot binary',
+      ],
+      configuredPath: config.godotPath,
+    })
+  }
+
   const result = detectGodot()
   if (!result) {
     return formatJSON({
