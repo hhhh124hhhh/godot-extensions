@@ -8,7 +8,7 @@
 #    all projects share the same real files, so editing once syncs everywhere.
 #    This is "install once, visible in all projects" without depending on
 #    Godot's version-floating global path.
-#    powershell -File install.ps1 -Project "D:/projects/game-prototypes/tomb-delver"
+#    powershell -File install.ps1 -Project "<你的Godot工程根>"
 #
 # 2) True global install (best-effort, version-dependent)
 #    Local plugins (unlike AssetLib ones) have no "Install to Editor" button,
