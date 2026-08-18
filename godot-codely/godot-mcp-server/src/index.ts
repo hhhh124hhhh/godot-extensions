@@ -52,7 +52,7 @@ function loadConfig(): GodotMcpConfig {
     port: num(process.env.GODOT_MCP_PORT || fileConfig.port, 8785),
     godotPath: process.env.GODOT_PATH || fileConfig.godotPath || '',
     godotProjectPath: process.env.GODOT_PROJECT_PATH || fileConfig.godotProjectPath || process.cwd(),
-    volcArkApiKey: process.env.VOLC_ARK_API_KEY || fileConfig.vorcArkApiKey || '',
+    volcArkApiKey: process.env.VOLC_ARK_API_KEY || fileConfig.volcArkApiKey || '',
   }
 }
 
