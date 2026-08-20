@@ -144,3 +144,7 @@ dsh web
 MIT © 2026 hhhh124hhhh
 
 （godot-mcp-server 内含 Apache-2.0 成分，见其 LICENSE/NOTICE）
+
+## 💬 交流
+
+欢迎提 Issue 讨论，或加微信  + 'hhhh124hhhh' + （备注 Godot Codely）入群交流。
