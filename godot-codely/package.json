@@ -7,6 +7,7 @@
   "main": "./dist/main.js",
   "files": [
     "package.json",
+    "LICENSE",
     "dsh-godot-mount.patch.yml",
     "SYSTEM_PROMPT.md",
     "QUICKSTART.md",
