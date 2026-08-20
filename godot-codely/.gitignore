@@ -1,0 +1,14 @@
+﻿# 依赖缓存
+node_modules/
+
+# 构建产物
+dist/
+*.tsbuildinfo
+
+# 下载物（CEF 二进制等大文件）
+downloads/
+
+# 编辑器/系统文件
+.DS_Store
+Thumbs.db
+*.log
