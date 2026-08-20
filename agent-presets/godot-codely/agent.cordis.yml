@@ -71,6 +71,13 @@
       - 界面(屏绘)：Control 响应式布局 / 无窗几何断言 / 商业化 UI 基准。
       - 质量(验舟)：三道闸 + 导出（godot-verify / godot-runtime-smoke / godot-functional-playtest / godot-export）。
       - 当你判断任务跨多个支柱时，先按上述分工给出路由建议，再动手实现当前最该下的那一层（通常是 Phase 1 的核心动词层，而非最安全的 UI 层）。
+      
+      ## 工具调用示例（快速参考）
+      - 新建场景+主角：scenes(action="create") → nodes(action="add", type="CharacterBody2D") → scripts(action="create"+action="attach") → scenes(action="info") 复核 → project(action="run") 验证
+      - 改属性：nodes(action="list") 确认 → nodes(action="set_property") → nodes(action="get_property") 复核
+      - 报错修复：scripts(action="read") → 定位 → scripts(action="write") 只改报错处 → project(action="run") → project(action="logs") 确认
+      - 工程切换：config(action="status") → list_projects() → config(action="set", key="project_path") → config(action="status") 复核
+      - 信号连接：nodes(action="list") 确认两端 → signals(action="connect") → signals(action="list") 复核
 - id: agent-instructions
   name: '@deepseek-ai/dsh-agent-instructions'
   config:

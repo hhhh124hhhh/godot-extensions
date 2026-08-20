@@ -83,3 +83,102 @@ godot-mcp-server 提供 23 个工具（每个用 `action` 参数区分子动作�
 - 不改写已验证可玩的底层核心循环去「加功能」导致断裂。
 - 不跳过三道闸直接宣称「完成」。
 - 不在没有 `scenes.info` / `nodes.list` 复核的情况下批量重写节点 / 脚本。
+
+
+## 工具调用示例（Loop Engineering 实操）
+
+### 示例 1：新建场景并添加主角
+
+目标：创建 scenes/game.tscn，添加 CharacterBody2D 主角 + 碰撞体
+
+Step 1: scenes(action="create", scene_path="scenes/game.tscn", root_type="Node2D", root_name="Game")
+        → 返回: { ok: true, scene_path: "scenes/game.tscn" }
+Step 2: nodes(action="add", scene_path="scenes/game.tscn", name="Player", type="CharacterBody2D", parent=".")
+        → 返回: { ok: true, name: "Player" }
+Step 3: nodes(action="add", scene_path="scenes/game.tscn", name="HitBox", type="CollisionShape2D", parent="Player")
+        → 返回: { ok: true }
+Step 4: scripts(action="create", script_path="scripts/player.gd", extends="CharacterBody2D", content="extends CharacterBody2D\n\nconst SPEED = 200.0\n\nfunc _physics_process(delta):\n\tvar direction = Input.get_vector(\"move_left\", \"move_right\", \"move_up\", \"move_down\")\n\tvelocity = direction * SPEED\n\tmove_and_slide()\n")
+        → 返回: { ok: true, script_path: "scripts/player.gd" }
+Step 5: scripts(action="attach", script_path="scripts/player.gd", scene_path="scenes/game.tscn", node_name="Player")
+        → 返回: { ok: true }
+Step 6: scenes(action="info", scene_path="scenes/game.tscn")
+        → 返回整棵节点树，复核结构正确
+Step 7: project(action="run")
+        → 验证能跑起来
+
+### 示例 2：修改已有节点属性
+
+目标：修改 Player 的碰撞层
+
+Step 1: nodes(action="list", scene_path="scenes/game.tscn")
+        → 确认 Player 节点存在
+Step 2: physics(action="body_config", scene_path="scenes/game.tscn", name="Player", collision_layer=2, collision_mask=1)
+        → 设置碰撞层和掩码
+Step 3: nodes(action="get_property", scene_path="scenes/game.tscn", name="Player", property="collision_layer")
+        → 复核值已变更
+
+### 示例 3：添加 UI 界面
+
+目标：给 MainUI 场景添加分数标签
+
+Step 1: scenes(action="info", scene_path="scenes/main_ui.tscn")
+        → 查看当前 UI 场景结构
+Step 2: ui(action="create_control", scene_path="scenes/main_ui.tscn", name="ScoreLabel", type="Label", parent=".")
+        → 创建 Label 控件
+Step 3: nodes(action="set_property", scene_path="scenes/main_ui.tscn", name="ScoreLabel", property="text", value="Score: 0")
+        → 设置文本
+Step 4: nodes(action="set_property", scene_path="scenes/main_ui.tscn", name="ScoreLabel", property="theme_override_font_sizes/font_size", value="24")
+        → 设置字号
+Step 5: scenes(action="info", scene_path="scenes/main_ui.tscn")
+        → 复核
+
+### 示例 4：报错修复闭环
+
+场景：project(action="run") 后控制台报 "Invalid call. Nonexistent function 'move_and_slide' on base: 'Node2D'"
+
+Step 1: scripts(action="read", script_path="scripts/player.gd")
+        → 读取脚本内容
+Step 2: 定位 → 节点类型是 Node2D 而非 CharacterBody2D，所以没有 move_and_slide()
+Step 3: scripts(action="write", script_path="scripts/player.gd", content="extends CharacterBody2D\n...")
+        → 只改 extends 类型，不重写整个脚本
+Step 4: project(action="run")
+        → 再次验证
+Step 5: project(action="logs")
+        → 确认无报错
+
+### 示例 5：工程切换
+
+用户说"切到另一个工程"
+
+Step 1: config(action="status")
+        → 看当前 project_path
+Step 2: list_projects(directory="D:/games", recursive=true)
+        → 扫描工程列表
+Step 3: config(action="set", key="project_path", value="D:/games/my-game")
+        → 切换（全局立即生效）
+Step 4: config(action="status")
+        → 复核 project_path 已指向目标工程
+
+### 示例 6：信号连接
+
+目标：把 Button 的 pressed 信号连到 Player 的 on_button_pressed 方法
+
+Step 1: nodes(action="list", scene_path="scenes/game.tscn")
+        → 确认 Button 和 Player 节点都存在
+Step 2: signals(action="connect", scene_path="scenes/game.tscn", signal="pressed", from="UI/StartButton", to="Player", method="on_button_pressed")
+        → 建立信号连接
+Step 3: signals(action="list", scene_path="scenes/game.tscn")
+        → 复核连接已建立
+
+### 示例 7：输入映射
+
+目标：添加 "jump" 输入动作，绑定空格键
+
+Step 1: input_map(action="list")
+        → 查看现有输入动作
+Step 2: input_map(action="add_action", action_name="jump", deadzone=0.5)
+        → 创建输入动作
+Step 3: input_map(action="add_event", action_name="jump", event_type="key", event_value="KEY_SPACE")
+        → 绑定空格键
+Step 4: input_map(action="list")
+        → 复核 jump 动作已存在且绑定了空格键
