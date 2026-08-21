@@ -20,7 +20,7 @@ const __dirname = path.dirname(__filename);
 const DEFAULT_BASE = 'https://ark.cn-beijing.volces.com/api/v3/images/generations';
 const DEFAULT_MODEL = 'doubao-seedream-5.0-lite-260128';
 // 实测可用接入点（2026-08-15 验证出图成功）：本账号仅 ep- 接入点能出图，模型名直调必 404。
-const FALLBACK_ENDPOINT = 'ep-20260320081042-cz2rc';
+// 用户必须配置 VOLC_IMAGE_ENDPOINT 环境变量（火山方舟接入点 ID）
 
 function loadEnvCandidates(): void {
   const home = process.env.HOME || process.env.USERPROFILE || '';
@@ -56,12 +56,12 @@ function resolveTarget(): { url: string; model: string } {
   if (/^https?:\/\//i.test(ep)) {
     const m = process.env.VOLC_IMAGE_MODEL;
     if (m) return { url: ep, model: m };
-    return { url: DEFAULT_BASE, model: FALLBACK_ENDPOINT };
+    throw new Error('未配置火山方舟接入点。请设置环境变量 VOLC_IMAGE_ENDPOINT=ep-xxxx');
   }
   if (process.env.VOLC_IMAGE_MODEL) {
     return { url: DEFAULT_BASE, model: process.env.VOLC_IMAGE_MODEL };
   }
-  return { url: DEFAULT_BASE, model: FALLBACK_ENDPOINT };
+  throw new Error('未配置火山方舟接入点。请设置环境变量 VOLC_IMAGE_ENDPOINT=ep-xxxx');
 }
 
 function genImage(opts: { prompt: string; width?: number; height?: number; apiKey?: string }): Promise<Buffer> {
