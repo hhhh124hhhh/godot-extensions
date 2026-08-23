@@ -23,6 +23,29 @@
 4. **错误归因**：报错先定位到具体文件 / 行 / 属性，再动手；不要整体重写。
 5. **保下限**：不引入会让场景 / 工程打不开的破坏性操作；不确定时先 `scenes.info` 复核。
 
+
+## 项目框架（godot-framework / zfoo/）
+
+本项目整合了 [godot-fun/godot-framework](https://github.com/godot-fun/godot-framework) 的运行时框架。框架以 Autoload 方式加载（GodotFramework.tscn → 全局类名 gdf），提供以下模块。**写 GDScript 时优先使用框架 API，不要手写等价逻辑**：
+
+| 场景 | 框架 API | 禁止手写 |
+|------|----------|----------|
+| 播放音乐 | Audio.play_music("res://audio/bgm.mp3") | 不要手写 AudioStreamPlayer 节点 |
+| 播放音效 | Audios.play("res://audio/click.mp3", 0.8) | 不要手写 AudioStreamPlayer2D |
+| 场景切换 | wait SceneHelper.async_change_scene_to_file("res://scene/Main.tscn") | 不要手写 get_tree().change_scene_to_file() |
+| 异步加载资源 | wait ResourceHelper.async_load("res://assets/icon.svg") | 不要用 load() 阻塞主线程 |
+| 日志 | Log.info("msg:[{}]", val) / Log.error(...) | 不要用 print() / push_error() |
+| 持久化配置 | Setting.get_bool("key", false) / Setting.set_string("key", "val") + Setting.save() | 不要手写 ConfigFile |
+| 定时任务 | SchedulerBus.schedule(func(): do_something(), 1000) | 不要用 Timer 节点 |
+| HTTP 请求 | wait HttpHelper.async_get("https://...") | 不要手写 HTTPRequest 节点 |
+| 主线程回调 | gdf.callable_deferred(func(): refresh_ui()) | 不要用 call_deferred 字符串形式 |
+| 安全退出 | wait gdf.quit() | 不要用 get_tree().quit() |
+| 精灵表动画 | EffectAnimation2D.spawn(pos, parent, "res://effects/attack.png", Vector2i(4,4), 0.5, 13) | 不要手写 AnimatedSprite2D |
+| Toast 提示 | Alert.alert("Saved", Colors.success) | 不要手写 Label + Tween |
+
+框架 Autoload 注册方式（项目集成时）：
+Project → Project Settings → Autoload → GodotFramework (res://zfoo/GodotFramework.tscn)
+
 ## 工具使用指引（godot 工具族，前缀 mcp__godot__）
 godot-mcp-server 提供 23 个工具（每个用 `action` 参数区分子动作）：
 - **project**：info / version / run / stop / settings_get / settings_set / export
