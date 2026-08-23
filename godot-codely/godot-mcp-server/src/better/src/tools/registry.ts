@@ -27,6 +27,7 @@ import { handleShader } from './composite/shader.js'
 import { handleSignals } from './composite/signals.js'
 import { handleTilemap } from './composite/tilemap.js'
 import { handleUI } from './composite/ui.js'
+import { handleFramework } from './composite/framework.js'
 import { findClosestMatch, formatError, GodotMCPError } from './helpers/errors.js'
 import { wrapToolResult } from './helpers/security.js'
 // [sovereign] coding-solo 独有工具 + image-gen 原生工具（单一注册点挂载）
@@ -520,6 +521,26 @@ const P3_TOOLS = [
     },
   },
   {
+    name: 'framework',
+    description: [
+      'godot-framework (zfoo/) integration.',
+      '',
+      'Actions (required params -> optional):',
+      '- check (-> project_path): verify zfoo/ integration status',
+      '- bootstrap (framework_source_path -> project_path): copy zfoo/ + register Autoload',
+    ].join('\n'),
+    annotations: createAnnotations('Framework', { destructive: true }),
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        action: { type: 'string', enum: ['check', 'bootstrap'], description: 'Action to perform' },
+        project_path: { type: 'string', description: 'Path to Godot project directory' },
+        framework_source_path: { type: 'string', description: 'Path to godot-framework directory (for bootstrap)' },
+      },
+      required: ['action'],
+    },
+  },
+  {
     name: 'ui',
     description:
       'UI Control nodes and themes. Actions: create_control|set_theme|layout|list_controls. Use help tool for full docs.',
@@ -547,6 +568,27 @@ const P3_TOOLS = [
       required: ['action'],
     },
   },
+  {
+    name: 'framework',
+    description: [
+      'godot-framework (zfoo/) integration.',
+      '',
+      'Actions (required params -> optional):',
+      '- check (-> project_path): verify zfoo/ integration status',
+      '- bootstrap (framework_source_path -> project_path): copy zfoo/ + register Autoload',
+    ].join('\n'),
+    annotations: createAnnotations('Framework', { destructive: true }),
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        action: { type: 'string', enum: ['check', 'bootstrap'], description: 'Action to perform' },
+        project_path: { type: 'string', description: 'Path to Godot project directory' },
+        framework_source_path: { type: 'string', description: 'Path to godot-framework directory (for bootstrap)' },
+      },
+      required: ['action'],
+    },
+  },
+
 ]
 
 // Envelope-loose output schema (spec 2025-11-25): domain tools return free-form
@@ -585,6 +627,7 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
   audio: handleAudio,
   navigation: handleNavigation,
   ui: handleUI,
+  framework: handleFramework,
 }
 
 // ---------------------------------------------------------------------------
