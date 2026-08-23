@@ -18,7 +18,7 @@ Godot Codely 把 **五人专家团** 装进 AI，让 AI 像专业游戏开发团
 - 🎨 **界面师** — Control 布局、商业化 UI
 - ✅ **质量师** — 三道闸验证、导出发布
 
-## 🎬 效果演示
+##  效果演示
 
 ```
 你：「做一个平台跳跃游戏，角色能二段跳，有敌人和金币」
@@ -31,23 +31,23 @@ AI（五人团协作）：
   质量师：编译闸 → 冒烟闸 → 功能自测闸
 ```
 
-## 🏗️ 架构
+## ️ 架构
 
 ```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+┌─────────────────     ┌─────────────────┐     ─────────────────┐
 │   DSH Web UI    │────▶│  Godot Codely   │────▶│ godot-mcp-server│
 │   (AI 对话)      │     │  (五人专家团)    │     │   (23 工具)      │
 │   :3080         │     │                 │     │   stdio 挂载     │
-└─────────────────┘     └─────────────────┘     └────────┬────────┘
+└─────────────────┘     └─────────────────┘     ────────┬────────┘
                                                           │
                                                           ▼
                                                  ┌─────────────────┐
                                                  │   Godot 工程     │
                                                  │  .tscn / .gd    │
-                                                 └─────────────────┘
+                                                 ─────────────────┘
 ```
 
-## 🚀 快速开始
+##  快速开始
 
 ### 前置条件
 
@@ -81,6 +81,7 @@ dsh plugin --profile web add ./godot-codely
 | `dsh-godot-mount.patch.yml` | MCP 挂载配置 |
 | `SYSTEM_PROMPT.md` | 方法论 2.0 源文档 |
 | `godot-codely-addon/` | 编辑器内嵌面板（可选） |
+| `godot-framework/` | Godot 轻量级框架 + Agent 技能集（来自 [godot-fun/godot-framework](https://github.com/godot-fun/godot-framework)） |
 | `QUICKSTART.md` | 端到端教程 |
 
 ## 🔧 MCP 工具列表
@@ -133,12 +134,57 @@ dsh plugin --profile web add ./godot-codely
 | 界面(屏绘) | Control 布局 / 商业化 UI |
 | 质量(验舟) | 三道闸 + 导出 |
 
-## 🔗 相关项目
+## 🧩 Godot Framework
+
+整合了 [godot-fun/godot-framework](https://github.com/godot-fun/godot-framework) 的运行时框架 + 40+ Agent 技能：
+
+### 运行时框架（`zfoo/`）
+
+| 模块 | 功能 |
+|------|------|
+| **Audio** | 音乐播放列表、音效、语音、交叉淡入淡出 |
+| **Network** | TCP/WebSocket 客户端 + 路由消息系统 |
+| **SceneHelper** | 场景切换（带淡入淡出/滑动过渡） |
+| **ResourceHelper** | 异步资源加载（不阻塞主线程） |
+| **SchedulerBus** | 定时/周期任务调度 |
+| **HotUpdate** | PCK 热更新（检查版本→下载→校验 MD5→加载） |
+| **Setting** | 持久化用户配置 |
+| **Log** | 文件日志 |
+| **Http** | 异步 GET/POST 请求 |
+| **AI** | OpenAI 兼容聊天（多轮对话） |
+
+### Agent 技能集（`.cursor/skills/`）
+
+40+ 个批量资产处理技能：
+
+| 类别 | 技能数 | 功能 |
+|------|--------|------|
+| **Audio** | 9 | 转 wav → 裁剪 → 响度 → 导出 |
+| **Image** | 8 | 转 png → 水印 → 分割 → 去背景 → 裁剪/缩放 |
+| **Video** | 9 | 水印 → 静音 → 4K → 合并 → 压缩 |
+| **Storyboard** | 4 | 分镜 → HTML 预览 → 配音 → 视频 → 混音 → 发布 |
+| **AI** | 1 | 文字转语音 |
+| **其他** | 2 | 命名规范、提交规范 |
+
+### 使用方式
+
+在 Godot 项目中：
+1. 复制 `godot-framework/zfoo/` 到项目根目录
+2. 注册 Autoload：`Project → Project Settings → Autoload → GodotFramework (res://zfoo/GodotFramework.tscn)`
+3. 完成！
+
+在 AI Agent 中：
+- Cursor / OpenCode：原生支持 `.cursor/skills/`
+- Claude：复制 `.cursor/skills/` → `.claude/skills/`
+- Codex：复制 `.cursor/skills/` → `.agents/skills/`
+
+##  相关项目
 
 - [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) — AI Agent 运行时
 - [godot-mcp-server](../godot-mcp-server) — Godot MCP Server
+- [godot-framework](https://github.com/godot-fun/godot-framework) — Godot 轻量级框架 + Agent 技能集
 - [dsh-vision-toolkit](https://github.com/Anionex/dsh-vision-toolkit) — 视觉验证插件
 
-## 📄 License
+##  License
 
 MIT © 2026 hhhh124hhhh
