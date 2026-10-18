@@ -77,9 +77,10 @@ dsh plugin --profile web add ./godot-codely
 
 | 文件 | 作用 |
 |------|------|
-| `presets/godot/agent.cordis.yml` | 五人专家团预设 |
+| `presets/godot/agent.cordis.yml` | 「Godot Codely」短 persona（`dsh-persona` / `config.text`） |
 | `dsh-godot-mount.patch.yml` | MCP 挂载配置 |
-| `SYSTEM_PROMPT.md` | 方法论 2.0 源文档 |
+| `SYSTEM_PROMPT.md` | 短 persona 源正文（须与两处 preset 的 `config.text` 逐字相同） |
+| `docs/` | 按需长材料：方法论 2.0、分层验证、Loop 示例、zfoo、五人团路由 |
 | `godot-codely-addon/` | 编辑器内嵌面板（可选） |
 | `godot-framework/` | Godot 轻量级框架 + Agent 技能集（来自 [godot-fun/godot-framework](https://github.com/godot-fun/godot-framework)） |
 | `QUICKSTART.md` | 端到端教程 |
@@ -98,7 +99,9 @@ dsh plugin --profile web add ./godot-codely
 
 ## 🔥 方法论 2.0
 
-预设注入的专家团方法论：
+长文在 `docs/methodology-2.0.md`，**不**注入每轮系统提示。单智能体 Codely 直接做最小一层。分层验证：结构编辑用 `scenes.info`；行为要引擎才 `project.run` 一次；宣称可上架 / Phase 3 完成才跑满三道闸。小改动不自动冒烟或功能自测。
+
+预设不再每轮注入下面全文，需要时再读 `docs/`：
 
 ### 不灰盒
 第一个交付就是**能玩的核心循环游戏**，从 t=0 按「能不能上架」倒推。
@@ -109,14 +112,14 @@ dsh plugin --profile web add ./godot-codely
 - Phase 2：内容质感
 - Phase 3：三道闸发布
 
-### 三道闸红线
+### 三道闸（仅宣称可上架 / Phase 3 完成）
 1. **编译闸** — `godot-verify` 全量 load
 2. **冒烟闸** — `godot-runtime-smoke`
 3. **功能闸** — `godot-functional-playtest`
 
 ## 👁️ 视觉验证
 
-配合 [dsh-vision-toolkit](https://github.com/Anionex/dsh-vision-toolkit) 实现截图验证闭环：
+用户要求对画面时，再配合 [dsh-vision-toolkit](https://github.com/Anionex/dsh-vision-toolkit)。这不是默认检查；结构编辑不要为了截图去跑游戏：
 
 ```
 改代码 → 运行 → 截图 → 像素对比 → 差异 > 5% → 定位修复 → 再验证
@@ -124,7 +127,7 @@ dsh plugin --profile web add ./godot-codely
 
 ## 🎯 五人团路由
 
-复杂任务自动路由给对应专家：
+单智能体 Codely **不要先五人团再动手**。路由给 **Godot Game Studio** / AgentTeams，说明在 `docs/team-routing.md`：
 
 | 专家 | 负责领域 |
 |------|----------|

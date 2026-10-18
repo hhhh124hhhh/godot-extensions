@@ -159,7 +159,7 @@ try {
 const whitelist =
   Array.isArray(codelyPkg.files) && codelyPkg.files.length
     ? codelyPkg.files
-    : ['package.json', 'dsh-godot-mount.patch.yml', 'presets', 'SYSTEM_PROMPT.md'];
+    : ['package.json', 'dsh-godot-mount.patch.yml', 'presets', 'SYSTEM_PROMPT.md', 'docs'];
 c.info('白名单文件：' + whitelist.join(', '));
 
 let installedByDsh = false;

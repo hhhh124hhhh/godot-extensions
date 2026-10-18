@@ -1,3 +1,3 @@
 name: Godot Codely
-description: Godot 工程 AI 助手（Loop Engineering + mcp__godot__* 23 工具）。先读后写、小步提交、运行验证、三道闸红线。
+description: Godot 工程 AI 助手（短 persona + mcp__godot__*）。先读后写；结构用 scenes.info，行为才 project.run 一次；三道闸仅在宣称可上架 / Phase 3。
 order: 10

@@ -79,5 +79,6 @@ patch 里 `env:` 的 `GODOT_PROJECT_PATH` / `GODOT_PATH` 可留空（服务器�
 ## 其他
 
 - **专家团预设**：`agent-presets/` 7 个预设，配合 AgentTeams 用（见 AGENTS.md）
+- **DeepSeek-V4.1-Flash**：Codely 热路径已是短 persona，长方法论在 `godot-codely/docs/`。模型与 `reasoningEffort` 在用户自己的 DSH profile 里设（本仓没有该配置文件）：模型 `deepseek-flash`，thinking 开，日常 `high`，小改 `low`，难问题才 `max`。详见 `godot-codely/QUICKSTART.md` §4.1。
 - **Godot 编辑器内嵌 dsh 面板**（可选）：`godot-codely/godot-codely-addon/`，需额外装 godot-cef webview 扩展，见其 README
 - **卸载/换机器**：重新 clone + 第 2、3 步即可；`npm link` 是软链，不占空间

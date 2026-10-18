@@ -55,7 +55,7 @@ node install-godot-stack.mjs
 dsh plugin --profile web add <本目录>/godot-codely
 ```
 等价手工法（EDR 阻断 pnpm 时用）：
-- 将 `godot-codely` 的白名单文件（`package.json` / `dsh-godot-mount.patch.yml` / `presets/` / `SYSTEM_PROMPT.md` / `README.md` / `QUICKSTART.md` / `AGENTS.md`）复制到
+- 将 `godot-codely` 的白名单文件（`package.json` / `dsh-godot-mount.patch.yml` / `presets/` / `SYSTEM_PROMPT.md` / `docs/` / `README.md` / `QUICKSTART.md` / `AGENTS.md`）复制到
   `~/.dsh/profiles/web/node_modules/godot-codely/`。
 - 在 `~/.dsh/profiles/web/package.json` 的 `dependencies` 加 `"godot-codely": "file:<绝对路径>/godot-codely"`，并在 `dsh.profile.bundles` 数组追加 `"godot-codely"`。
 
@@ -130,7 +130,7 @@ godot-mcp-server 的 AI 出图走**火山方舟（Volcengine Ark）**，需要 A
 | 层 | 内容 | 是否随仓 |
 |---|---|---|
 | **机制壳** | godot-mcp-server、AgentTeams 团队、安装器、预设框架、godot-codely-addon、CEF 补丁 | ✅ 随仓（分享价值） |
-| **纪律条款** | SYSTEM_PROMPT / presets 里的 Loop Engineering、方法论 2.0、四轴、阶段门控、三道闸、五人团路由、AgentTeams 协议 | ✅ 随仓（**纪律是插件的灵魂，没有纪律插件就无意义**） |
+| **纪律条款** | 短 persona 三处逐字相同（`godot-codely/SYSTEM_PROMPT.md`、`godot-codely/presets/godot/agent.cordis.yml` 与 `agent-presets/godot-codely/agent.cordis.yml` 的 `dsh-persona` `config.text`）。长材料在 `godot-codely/docs/`（方法论 2.0、分层验证、Loop 示例、zfoo、五人团路由）。AgentTeams 协议仍在 Game Studio 预设 | ✅ 随仓（**纪律是插件的灵魂，没有纪律插件就无意义**） |
 | **方法论数据** | `~/.workbuddy/lab-intel/` 台账（情报/坑库/设计关键）、各游戏工程的私有方法论沉淀 | ❌ **不随仓**（作者私有飞轮资产） |
 
 - 预设里对台账/组件库的引用一律是**条件化文字**（"仅作者本机有；若不存在则跳过"）——这是设计，不是遗漏。

@@ -67,14 +67,23 @@ node --import tsx/esm apps/cli/src/bin.ts web \
 **不用手动粘 system prompt**。新建会话时：
 1. dsh web(3080) 新会话界面右侧有「模式」芯片（默认可能是 Cocos Codely）。
 2. 点开 → 选 **Godot Codely**（id=`godot-codely`，user 信任级）。
-3. 新建会话即自动带上专家团大脑：方法论 2.0 / 四轴 / 阶段门控 / 五人团路由 / 三道闸红线 + 全套 godot 工具。
+3. 新建会话带上**短 persona**（先读后写、一次检查然后停）+ 全套 godot 工具。方法论 2.0 / 四轴 / 阶段门控 / 五人团 / 工具长示例在 `docs/`，按需再读，不进每轮系统提示。单智能体 Codely 直接做最小一层，不要先五人团再动手。
 
-> 为什么是自动的：godot 专家团知识固化在 `~/.dsh/.agent-presets/godot-codely/agent.cordis.yml` 的 persona 段
-> （本仓 `SYSTEM_PROMPT.md` 是该 persona 的「源文档」，改专家团知识请同步改 preset 的 persona 段，避免漂移）。
+> 为什么是自动的：生效的是 preset 里 `@deepseek-ai/dsh-persona` 的 `config.text`。
+> 这段正文必须与另外两处逐字相同：本仓 `SYSTEM_PROMPT.md`，以及 `presets/godot/agent.cordis.yml`。
+> 长材料改 `docs/`，不要写回 persona。见 `AGENTS.md` 同步纪律。
+
+### 4.1 DeepSeek-V4.1-Flash（日常模型，用户侧 DSH 配置）
+
+短系统提示是给 Flash 用的：思考开着，边界放在用户消息和按需文档里。本仓**没有**模型路由配置文件（搜过 patch / preset，没有 `reasoningEffort` 或 `deepseek-flash` 字段），下面是 **DSH profile / 模型路由里由用户自己设** 的建议，字段名以你本机 DSH 为准：
+
+- 模型：`deepseek-flash`（DeepSeek-V4.1-Flash）
+- 打开 thinking
+- `reasoningEffort`：日常 `high`；很小的改动 `low`；只有难问题用 `max`
 
 ### 5. 开干
-在 dsh web(3080) 用中文描述需求 → 模型走 Loop Engineering：
-`scenes.list`/`scenes.info` 看结构 → `nodes.add`/`nodes.set_property`/`scripts.write` 改 → `project.run` 看报错 → 修。
+在 dsh web(3080) 用中文描述需求 → 模型走分层验证：
+`scenes.info` 看结构 → `nodes.add` / `nodes.set_property` / `scripts.write` 改 → 结构编辑用 `scenes.info` 停；只有行为需要引擎才 `project.run` **一次**。宣称可上架 / Phase 3 完成才跑满三道闸。小改动不自动冒烟或功能自测。
 
 ## 离线 / EDR 受限方案（可选）
 若 `npm link` 或全局命令被网络 / EDR 拦（本机常遇到），退化为直接用 node 跑 build 产物：
@@ -118,10 +127,9 @@ generate_sprite / generate_image（后两个需 VOLC_ARK_API_KEY）
 ## 已知边界
 - `project.run` / `project.export` 是长操作，失败或超时时在 dsh 里续写修复命令即可。
 - 不确定某工具的参数 → 先调 `mcp__godot__help`（自带文档工具）。
-- 自研 server 默认文本化改 .tscn，复杂结构性改动后建议 `project.run` 真跑一遍验证（配合 godot-verify 三道闸更佳）。
+- 自研 server 默认文本化改 .tscn。结构编辑用 `scenes.info` 复核即可；行为需要引擎时 `project.run` 一次。三道闸（godot-verify → 冒烟 → 功能自测）只在宣称可上架 / Phase 3 完成时跑满。小改动不要自动升格。
 - **改 `dsh-godot-mount.patch.yml` 必须保留顶层的 `- insert:` 包裹**（见 dsh `examples/mcp-memory/engram.cordis.yml`）。
   若把 `mcp-godot` 行直接放顶层（无 `insert:`），dsh 会把它当成「覆盖已有行」而报
   `patch: entry "mcp-godot" not found`，**MCP 静默不挂载**。
 - **改 patch 的 `--patch` 路径必须用 Windows 绝对路径**（`D:/...`），不要用 `/d/...`（Node 内 `resolve` 会落成 `D:\d\...`）。
-- 专家团知识在 preset（`~/.dsh/.agent-presets/godot-codely/agent.cordis.yml`）与源文档（`SYSTEM_PROMPT.md`）两处；
-  生效的是 preset 里的 persona 段，改专家团知识请同步两处避免漂移。
+- 短 persona 三处必须逐字相同：`SYSTEM_PROMPT.md`、`presets/godot/agent.cordis.yml` 的 `config.text`、`~/.dsh/.agent-presets/godot-codely/agent.cordis.yml`（源在主仓 `agent-presets/godot-codely/`）。生效的是 preset 里的 `config.text`。长方法论在 `docs/`。

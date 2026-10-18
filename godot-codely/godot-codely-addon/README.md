@@ -91,7 +91,7 @@ powershell -File install.ps1 -Global
 |---|---|---|
 | 聊天 UI 位置 | Cocos 面板 `<iframe>` dsh web | Godot 面板 webview 渲染 dsh web |
 | AI 工具源 | cocos-mcp-bridge (8765) | godot-mcp-server (stdio) |
-| 专家团知识 | SYSTEM_PROMPT.md | SYSTEM_PROMPT.md（同一套） |
+| 专家团知识 | SYSTEM_PROMPT.md | 短 persona（`SYSTEM_PROMPT.md`）；长方法论在 `docs/` |
 | 改文件方式 | MCP 工具改工程 | MCP 工具改工程（同） |
 | Godot 编辑器常驻 | 不需要（Cocos 侧） | 不需要（AI 改文件），仅 run/export 调二进制 |
 
